@@ -1,0 +1,1 @@
+type C:\Windows\Temp\tmp.zpl > LPT1
