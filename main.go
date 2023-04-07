@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"nautilus-print-server/log"
 	"nautilus-print-server/response"
 	"nautilus-print-server/zpl"
@@ -16,7 +17,13 @@ func main() {
 	m := melody.New()
 	m.Config.PingPeriod = 1 * time.Second
 
-	log_file, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	// get user's home directory
+	home_dir := os.Getenv("HOME")
+	if home_dir == "" {
+		log.Default().Fatal("HOME env variable not set")
+	}
+
+	log_file, err := os.OpenFile(fmt.Sprintf("%s/nautilus-print-server.log", home_dir), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Default().Fatal(err)
 	}
@@ -34,18 +41,10 @@ func main() {
 			m.Broadcast([]byte("ERROR UNMARSHALLING"))
 			return
 		}
-		log.Default().Println(printable)
 
-		// if printable.Type == zpl.Retouching {
-		// 	zpl_string := zpl.Retou
-
-		// 	m.Broadcast(
-		// 		response.Success("In Retouching").ToByte(),
-		// 	)
-		// 	return
-		// }
 		if printable.Type == zpl.Cutting {
 			zpl_string := zpl.CuttingZPLString(printable)
+			log.Default().Println(zpl_string)
 			if err := zpl.ExecuteZpl(zpl_string); err != nil {
 				log.Default().Printf("Error executing zpl: %s", err)
 				m.Broadcast(
@@ -54,7 +53,7 @@ func main() {
 				return
 			}
 			m.Broadcast(
-				response.Success(string(b)).ToByte(),
+				response.Success(printable).ToByte(),
 			)
 			return
 		}

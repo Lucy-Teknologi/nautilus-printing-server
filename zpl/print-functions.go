@@ -36,9 +36,6 @@ func RetouchingZPLString(printable Printable) string {
 }
 
 func CuttingZPLString(printable Printable) string {
-	basket_str := fmt.Sprint(printable.Basket)
-	loin_str := fmt.Sprint(printable.Loin)
-	weight_str := fmt.Sprint(printable.Weight)
 	return fmt.Sprintf(`
 		^XA
 		^PW406
@@ -48,18 +45,18 @@ func CuttingZPLString(printable Printable) string {
 		^FS
 		^FO125,216^A0,20^FD%s^FS
 		^FO115,240^A0,20^FDCutting %s^FS
-		^FO135,288^A0,20^FDBasket: %s^FS
-		^FO135,308^A0,20^FDLoin: %s^FS
-		^FO135,328^A0,20^FDBerat: %s^FS
+		^FO135,288^A0,20^FDBasket: %d^FS
+		^FO135,308^A0,20^FDLoin: %d^FS
+		^FO135,328^A0,20^FDBerat: %.3f^FS
 		^FO135,348^A0,20^FDGrade: %s^FS
 		^XZ
-	`,
+		`,
 		printable.ILC,
 		printable.CommonILC,
 		printable.CuttingDate,
-		padStart(basket_str, BasketSpace-len(basket_str), " "),
-		padStart(loin_str, LoinSpace-len(loin_str), " "),
-		padStart(weight_str, WeightSpace-len(weight_str), " "),
-		padStart(printable.Grade, GradeSpace-len(printable.Grade), " "),
+		printable.Basket,
+		printable.Loin,
+		printable.Weight,
+		printable.Grade,
 	)
 }

@@ -1,0 +1,14 @@
+[Unit]
+Description=Nautilus Print Server (Websocket)
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ken
+ExecStart=/usr/bin/env /usr/bin/nautilus-print-server
+
+[Install]
+WantedBy=multi-user.target
