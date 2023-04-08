@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=ken
+User=$USER
 ExecStart=/usr/bin/env /usr/bin/nautilus-print-server
 
 [Install]

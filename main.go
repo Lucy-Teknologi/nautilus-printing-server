@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/olahol/melody"
 )
 
@@ -35,30 +34,17 @@ func main() {
 	})
 
 	m.HandleMessage(func(s *melody.Session, b []byte) {
-		var printable zpl.Printable
-		if err := jsoniter.Unmarshal(b, &printable); err != nil {
-			log.Default().Printf("Error unmarshalling: %s", err)
-			m.Broadcast([]byte("ERROR UNMARSHALLING"))
-			return
-		}
-
-		if printable.Type == zpl.Cutting {
-			zpl_string := zpl.CuttingZPLString(printable)
-			log.Default().Println(zpl_string)
-			if err := zpl.ExecuteZpl(zpl_string); err != nil {
-				log.Default().Printf("Error executing zpl: %s", err)
-				m.Broadcast(
-					response.Error(err).ToByte(),
-				)
-				return
-			}
+		if err := zpl.ExecuteZpl(string(b)); err != nil {
+			log.Default().Printf("Error executing zpl: %s because %s", b, err)
 			m.Broadcast(
-				response.Success(printable).ToByte(),
+				response.Error(err).ToByte(),
 			)
 			return
 		}
 
-		m.Broadcast(response.ErrorWithMessage("Command not found").ToByte())
+		m.Broadcast(
+			response.Success(string(b)).ToByte(),
+		)
 	})
 
 	if err := http.ListenAndServe(":9000", nil); err != nil {

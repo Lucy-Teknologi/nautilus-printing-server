@@ -11,7 +11,6 @@ import (
 var lp_alike = regexp.MustCompile(`^lp\d+`)
 
 func ExecuteZpl(zpl_commands string) error {
-	// list all the files in the /dev/usb/ directory
 	first_lp_device := ""
 	filepath.Walk("/dev/usb/", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -29,28 +28,13 @@ func ExecuteZpl(zpl_commands string) error {
 		return errors.New("no lp device found, restart service and try again")
 	}
 
-	// // Retrieve file information
-	// fileInfo, err := os.Stat(first_lp_device)
-	// if err != nil {
-	// 	log.Default().Println("Failed to retrieve file information:", err)
-	// 	return err
-	// }
-
-	// // Check if the file has write permissions
-	// if fileInfo.Mode().Perm()&0200 == 0 {
-	// 	log.Default().Println("You do not have write permissions to the file.")
-	// 	return errors.New("you do not have write permissions to the file")
-	// }
-
-	// log.Default().Println("You have write permissions to the file.")
-
 	file, err := os.OpenFile(first_lp_device, os.O_APPEND|os.O_WRONLY, 0)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	bufferSize := 256
+	bufferSize := 8
 
 	for len(zpl_commands) > 0 {
 		// Determine the size of the next chunk to be written
