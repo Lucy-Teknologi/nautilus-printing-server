@@ -33,6 +33,8 @@ func main() {
 		m.HandleRequest(w, r)
 	})
 
+	m.Config.MaxMessageSize = 1024
+
 	m.HandleMessage(func(s *melody.Session, b []byte) {
 		if err := zpl.ExecuteZpl(string(b)); err != nil {
 			log.Default().Printf("Error executing zpl: %s because %s", b, err)
@@ -45,6 +47,10 @@ func main() {
 		m.Broadcast(
 			response.Success(string(b)).ToByte(),
 		)
+	})
+
+	m.HandleError(func(s *melody.Session, err error) {
+		log.Default().Printf("Error: %s", err)
 	})
 
 	if err := http.ListenAndServe(":9000", nil); err != nil {
