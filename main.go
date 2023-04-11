@@ -15,14 +15,9 @@ import (
 func main() {
 	m := melody.New()
 	m.Config.PingPeriod = 1 * time.Second
+	m.Config.MaxMessageSize = 1024 * 100 // ~100kb
 
-	// get user's home directory
-	home_dir := os.Getenv("HOME")
-	if home_dir == "" {
-		log.Default().Fatal("HOME env variable not set")
-	}
-
-	log_file, err := os.OpenFile(fmt.Sprintf("%s/nautilus-print-server.log", home_dir), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	log_file, err := os.OpenFile(fmt.Sprintf("%s/nautilus-print-server.log", os.TempDir()), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Default().Fatal(err)
 	}
@@ -33,9 +28,12 @@ func main() {
 		m.HandleRequest(w, r)
 	})
 
-	m.Config.MaxMessageSize = 1024
-
 	m.HandleMessage(func(s *melody.Session, b []byte) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Default().Printf("Recovered in f: %s", r)
+			}
+		}()
 		if err := zpl.ExecuteZpl(string(b)); err != nil {
 			log.Default().Printf("Error executing zpl: %s because %s", b, err)
 			m.Broadcast(

@@ -1,5 +1,5 @@
 [Unit]
-Description=Nautilus Print Server (Websocket)
+Description=Nautilus Print Server (Websocket) 0.2.0
 After=network.target
 StartLimitIntervalSec=0
 
